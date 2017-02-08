@@ -4,7 +4,7 @@ import os
 import cgi
 import tempfile
 import subprocess
-
+from shutil import copyfile
 
 class Mountable(object):
     """
@@ -72,7 +72,7 @@ class ImgHostApiV1(Mountable):
         sha = subprocess.check_output(["sha512sum", theFile.file.name])
         sha = sha.decode("UTF-8").split(" ")[0]
         imgpath = os.path.join("i", "{}.{}".format(sha[0:8], ext))
-        os.link(theFile.file.name, os.path.join("ui", imgpath))
+        copyfile(theFile.file.name, os.path.join("ui", imgpath))
         cherrypy.response.headers['Location'] = "/" + imgpath
         cherrypy.response.status = 302
 
