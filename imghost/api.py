@@ -73,7 +73,8 @@ class ImgHostApiV1(Mountable):
         sha = sha.decode("UTF-8").split(" ")[0]
         imgpath = os.path.join("i", "{}.{}".format(sha[0:8], ext))
         os.link(theFile.file.name, os.path.join("ui", imgpath))
-        raise cherrypy.HTTPRedirect("/" + imgpath)
+        cherrypy.response.headers['Location'] = "/" + imgpath
+        cherrypy.response.status = 302
 
 
 class ImgHostApi(object):
@@ -83,9 +84,11 @@ class ImgHostApi(object):
         self.ui = Mountable(conf={'/': {
                                   'tools.staticdir.on': True,
                                   'tools.staticdir.dir': ui_path,
-                                  'tools.staticdir.index': 'index.html'}}).mount('/')
+                                  'tools.staticdir.index': 'index.html'
+                                  }}).mount('/')
 
-        self.app_v1 = ImgHostApiV1().mount('/api/v1')
+        self.app_v1 = ImgHostApiV1(conf={'/': {'tools.proxy.on': True,
+                                               }}).mount('/api/v1')
 
         cherrypy.config.update({
             'sessionFilter.on': False,
@@ -98,7 +101,8 @@ class ImgHostApi(object):
             'server.socket_host': '0.0.0.0',
             'server.socket_timeout': 5,
             'log.screen': False,
-            'engine.autoreload.on': False
+            'engine.autoreload.on': False,
+
         })
 
     def run(self):

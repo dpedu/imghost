@@ -1,0 +1,24 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+
+    root /usr/share/imghost/ui/;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location /api {
+        proxy_pass http://127.0.0.1:3000;
+    }
+
+    #error_page 404 /404.html;
+
+    #error_page 500 502 503 504 /50x.html;
+
+    #location = /50x.html {
+    #   root /usr/share/nginx/html;
+    #}
+
+}
